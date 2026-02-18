@@ -1,0 +1,2 @@
+# PAYMENTS
+This is the payments microservice for the e-commerce application. It handles all payment-related operations, including processing payments, managing payment methods, and integrating with third-party payment gateways.

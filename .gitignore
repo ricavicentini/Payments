@@ -1,0 +1,22 @@
+# ============================================
+#   .NET / C# Standard Ignore
+# ============================================
+
+# Build results
+bin/
+obj/
+out/
+
+# ASP.NET Core
+wwwroot/lib/
+appsettings.Development.json
+appsettings.Local.json
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Entity Framework
+Migrations/
