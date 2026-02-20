@@ -1,9 +1,52 @@
 using System;
+using System.Text;
+using Domain.Enums;
+
 namespace Domain.ValueObjects;
 public record Money
 {
     public decimal Amount { get; init; }
-    public string Currency { get; init; }
+    public CurrencyType Currency { get; init; }
 
-    
+    public Money(decimal amount, CurrencyType currencyType)
+    {
+        Amount = amount;
+        Currency = currencyType;
+    }
+
+}
+
+public record DefaultMoneyBehaviour : Money
+{
+    public string? MoneyTag { get; init; }
+    public int Decimals {get; init;}
+
+    public DefaultMoneyBehaviour(string moneyTag, int decimalpalces, decimal amount, CurrencyType currencyType) : base(amount, currencyType)
+    {
+        MoneyTag = moneyTag;
+        Decimals = decimalpalces;
+    }
+
+    public override string ToString() => $"{MoneyTag} {Math.Round(Amount,Decimals)}";
+}
+
+public record BRL : DefaultMoneyBehaviour 
+{
+    public BRL(decimal amount) : base("R$", 2, amount, CurrencyType.BRL)
+    {
+       
+    }
+
+    public override string ToString() => base.ToString();
+}
+
+public record USD : DefaultMoneyBehaviour
+{
+    private const string  moneyTag = "US$";
+    public USD(decimal amount) : base(moneyTag, 2, amount, CurrencyType.USD)
+    {
+
+    }
+
+    public override string ToString() => base.ToString();
 }
