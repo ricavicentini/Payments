@@ -7,6 +7,12 @@ namespace Domain.ValueObjects;
 
 public sealed record CreditCardDetails
 {
+    private const int MinCardNumberLength = 13;
+    private const int MaxCardNumberLength = 19;
+    private const int MinHolderNameLength = 2;
+    private const int MaxHolderNameLength = 100;
+    private static readonly int[] AllowedCvvLengths = [3, 4];
+
     public string CardNumber { get; }
     public string CardHolderName { get; }
     public DateTime ExpirationDate { get; }
@@ -26,50 +32,10 @@ public sealed record CreditCardDetails
         DateTime expirationDate,
         string cvv)
     {
-        var errors = new List<string>();
         var normalizedCardNumber = NormalizeCardNumber(cardNumber);
         var normalizedHolderName = cardHolderName?.Trim();
         var normalizedCvv = cvv?.Trim();
-
-        if (string.IsNullOrWhiteSpace(normalizedCardNumber))
-        {
-            errors.Add("Card number is required.");
-        }
-        else if (!normalizedCardNumber.All(char.IsDigit) || normalizedCardNumber.Length < 13 || normalizedCardNumber.Length > 19)
-        {
-            errors.Add("Card number must contain only digits and have between 13 and 19 characters.");
-        }
-
-        if (string.IsNullOrWhiteSpace(normalizedHolderName))
-        {
-            errors.Add("Card holder name is required.");
-        }
-        else if (normalizedHolderName.Length < 2 || normalizedHolderName.Length > 100)
-        {
-            errors.Add("Card holder name must have between 2 and 100 characters.");
-        }
-
-        if (expirationDate == default)
-        {
-            errors.Add("Expiration date is required.");
-        }
-        else
-        {
-            var expirationLimit = new DateTime(expirationDate.Year, expirationDate.Month, DateTime.DaysInMonth(expirationDate.Year, expirationDate.Month), 23, 59, 59, DateTimeKind.Utc);
-            if (expirationLimit < DateTime.UtcNow)
-            {
-                errors.Add("Expiration date cannot be in the past.");
-            }
-        }
-
-        if (string.IsNullOrWhiteSpace(normalizedCvv))
-        {
-            errors.Add("CVV is required.");
-        }
-        else if (!normalizedCvv.All(char.IsDigit) || (normalizedCvv.Length != 3 && normalizedCvv.Length != 4))
-        {
-            errors.Add("CVV must contain only digits and have 3 or 4 characters.");
-        }
+        var errors = Validate(normalizedCardNumber, normalizedHolderName, expirationDate, normalizedCvv);
 
         if (errors.Count > 0)
         {
@@ -87,6 +53,87 @@ public sealed record CreditCardDetails
         string.IsNullOrWhiteSpace(value)
             ? string.Empty
             : value.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+    private static List<string> Validate(
+        string normalizedCardNumber,
+        string? normalizedHolderName,
+        DateTime expirationDate,
+        string? normalizedCvv)
+    {
+        var errors = new List<string>();
+        ValidateCardNumber(normalizedCardNumber, errors);
+        ValidateCardHolderName(normalizedHolderName, errors);
+        ValidateExpirationDate(expirationDate, errors);
+        ValidateCvv(normalizedCvv, errors);
+        return errors;
+    }
+
+    private static void ValidateCardNumber(string cardNumber, ICollection<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(cardNumber))
+        {
+            errors.Add("Card number is required.");
+            return;
+        }
+
+        var hasValidLength = cardNumber.Length is >= MinCardNumberLength and <= MaxCardNumberLength;
+        if (!cardNumber.All(char.IsDigit) || !hasValidLength)
+        {
+            errors.Add("Card number must contain only digits and have between 13 and 19 characters.");
+        }
+    }
+
+    private static void ValidateCardHolderName(string? cardHolderName, ICollection<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(cardHolderName))
+        {
+            errors.Add("Card holder name is required.");
+            return;
+        }
+
+        var hasValidLength = cardHolderName.Length is >= MinHolderNameLength and <= MaxHolderNameLength;
+        if (!hasValidLength)
+        {
+            errors.Add("Card holder name must have between 2 and 100 characters.");
+        }
+    }
+
+    private static void ValidateExpirationDate(DateTime expirationDate, ICollection<string> errors)
+    {
+        if (expirationDate == default)
+        {
+            errors.Add("Expiration date is required.");
+            return;
+        }
+
+        var expirationLimit = new DateTime(
+            expirationDate.Year,
+            expirationDate.Month,
+            DateTime.DaysInMonth(expirationDate.Year, expirationDate.Month),
+            23,
+            59,
+            59,
+            DateTimeKind.Utc);
+
+        if (expirationLimit < DateTime.UtcNow)
+        {
+            errors.Add("Expiration date cannot be in the past.");
+        }
+    }
+
+    private static void ValidateCvv(string? cvv, ICollection<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(cvv))
+        {
+            errors.Add("CVV is required.");
+            return;
+        }
+
+        if (!cvv.All(char.IsDigit) || !AllowedCvvLengths.Contains(cvv.Length))
+        {
+            errors.Add("CVV must contain only digits and have 3 or 4 characters.");
+        }
+    }
 }
 
 public sealed record CreditCardValidationErrors

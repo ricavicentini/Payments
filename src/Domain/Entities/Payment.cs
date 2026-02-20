@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Metadata.Ecma335;
 using Domain.Enums;
 using Domain.ValueObjects;
 using OneOf;
@@ -31,16 +32,15 @@ public class Payment
     public static OneOf<Payment, CreditCardValidationErrors> CreateBRLCreditCardPayment(decimal amount, string? description, string cardNumber, string cardHolderName, DateTime expirationDate, string cvv)
     {
         var cardDetailsResult = AddCreditCardDetails(cardNumber, cardHolderName, expirationDate, cvv);
-        if (cardDetailsResult.TryPickT0(out var cardDetails, out var validationErrors))
-        {
-            return new Payment(amount: new BRL(amount),
+
+        return cardDetailsResult.Match<OneOf<Payment, CreditCardValidationErrors>>(
+            cardDetails => new Payment(amount: new BRL(amount),
                                description: description,
                                paymentType: PaymentType.CreditCard,
                                createdAt: DateTime.UtcNow,
-                               paymentDetails: cardDetails);
-        }
-
-        return validationErrors;
+                               paymentDetails: cardDetails),
+            validationErrors => validationErrors
+        );
     }
 
 
