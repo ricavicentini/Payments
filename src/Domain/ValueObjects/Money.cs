@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Text;
 using Domain.Enums;
 
@@ -27,7 +28,11 @@ public record DefaultMoneyBehaviour : Money
         Decimals = decimalpalces;
     }
 
-    public override string ToString() => $"{MoneyTag} {Math.Round(Amount,Decimals)}";
+    public override string ToString()
+    {
+        var rounded = Math.Round(Amount, Decimals);
+        return $"{MoneyTag} {rounded.ToString($"F{Decimals}", CultureInfo.InvariantCulture)}";
+    }
 }
 
 public record BRL : DefaultMoneyBehaviour 

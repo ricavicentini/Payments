@@ -1,6 +1,8 @@
 using System;
 using Domain.Enums;
 using Domain.ValueObjects;
+using OneOf;
+
 
 namespace Domain.Entities;
 
@@ -11,16 +13,34 @@ public class Payment
     public string? Description { get; private set; }
     public PaymentType Type { get; private set; }
     public DateTime CreatedAt { get; private set; }
-    public PixDetails? PixDetails { get; private set; }
-    public CreditCardDetails? CreditCardDetails { get; private set; }
+    public OneOf<PixDetails, CreditCardDetails> PaymentDetails {get; private set;}
 
-    public Payment(Money amount,  string? description, PaymentType paymentType, DateTime createdAt)
+    private Payment(Money amount, string? description, PaymentType paymentType, DateTime createdAt, OneOf<PixDetails, CreditCardDetails> paymentDetails)
     {
         Id = Guid.NewGuid();
         Amount = amount;
         Description = description;
         Type = paymentType;
         CreatedAt = createdAt;
+        PaymentDetails = paymentDetails;
+    }
+
+    private static OneOf<CreditCardDetails, CreditCardValidationErrors> AddCreditCardDetails(string cardNumber, string cardHolderName, DateTime expirationDate, string cvv) =>
+        CreditCardDetails.Create(cardNumber, cardHolderName, expirationDate, cvv);
+
+    public static OneOf<Payment, CreditCardValidationErrors> CreateBRLCreditCardPayment(decimal amount, string? description, string cardNumber, string cardHolderName, DateTime expirationDate, string cvv)
+    {
+        var cardDetailsResult = AddCreditCardDetails(cardNumber, cardHolderName, expirationDate, cvv);
+        if (cardDetailsResult.TryPickT0(out var cardDetails, out var validationErrors))
+        {
+            return new Payment(amount: new BRL(amount),
+                               description: description,
+                               paymentType: PaymentType.CreditCard,
+                               createdAt: DateTime.UtcNow,
+                               paymentDetails: cardDetails);
+        }
+
+        return validationErrors;
     }
 
 

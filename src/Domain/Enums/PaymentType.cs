@@ -1,8 +1,9 @@
 namespace Domain.Enums;
 public enum PaymentType
 {
-    Card = 1,
-    Pix = 2
+    CreditCard = 1,
+    Debit = 2,
+    Pix = 3
 }
 
 public enum CurrencyType
