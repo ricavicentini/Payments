@@ -23,6 +23,7 @@
 - Do not use exceptions for flow control.
 - Exceptions must be thrown only for unexpected failures.
 - Use the Result pattern for expected outcomes. Preferred library: OneOf. But Alternative options can be evaluated when necessary.
+- When using OneOf
 
 ## Testing Standards
 ### Unit Tests

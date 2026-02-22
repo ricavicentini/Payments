@@ -1,4 +1,4 @@
-using Api.Endpoints;
+﻿using Api.Endpoints;
 
 var builder = WebApplication.CreateBuilder();
 builder.Services.AddEndpointsApiExplorer();

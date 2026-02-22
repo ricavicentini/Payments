@@ -1,4 +1,4 @@
-using Domain.ValueObjects;
+﻿using Domain.ValueObjects;
 
 namespace Domain.UnitTests;
 
@@ -15,10 +15,10 @@ public class CreditCardDetailsTests
             expirationDate: expirationDate,
             cvv: "123");
 
-        Assert.True(result.IsT0);
-        Assert.Equal("4111111111111111", result.AsT0.CardNumber);
-        Assert.Equal("John Doe", result.AsT0.CardHolderName);
-        Assert.Equal("123", result.AsT0.CVV);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("4111111111111111", result.Value.CardNumber);
+        Assert.Equal("John Doe", result.Value.CardHolderName);
+        Assert.Equal("123", result.Value.CVV);
     }
 
     [Fact]
@@ -30,8 +30,8 @@ public class CreditCardDetailsTests
             expirationDate: DateTime.UtcNow.AddMonths(6),
             cvv: "123");
 
-        Assert.True(result.IsT1);
-        Assert.Contains(result.AsT1.Errors, error => error.Contains("Card number"));
+        Assert.True(result.IsFailed);
+        Assert.Contains(result.Errors, error => error.Message.Contains("Card number"));
     }
 
     [Fact]
@@ -43,8 +43,8 @@ public class CreditCardDetailsTests
             expirationDate: DateTime.UtcNow.AddMonths(6),
             cvv: "123");
 
-        Assert.True(result.IsT1);
-        Assert.Contains(result.AsT1.Errors, error => error.Contains("Card holder name"));
+        Assert.True(result.IsFailed);
+        Assert.Contains(result.Errors, error => error.Message.Contains("Card holder name"));
     }
 
     [Fact]
@@ -56,8 +56,8 @@ public class CreditCardDetailsTests
             expirationDate: DateTime.UtcNow.AddMonths(-2),
             cvv: "123");
 
-        Assert.True(result.IsT1);
-        Assert.Contains(result.AsT1.Errors, error => error.Contains("Expiration date"));
+        Assert.True(result.IsFailed);
+        Assert.Contains(result.Errors, error => error.Message.Contains("Expiration date"));
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class CreditCardDetailsTests
             expirationDate: DateTime.UtcNow.AddMonths(6),
             cvv: "12A");
 
-        Assert.True(result.IsT1);
-        Assert.Contains(result.AsT1.Errors, error => error.Contains("CVV"));
+        Assert.True(result.IsFailed);
+        Assert.Contains(result.Errors, error => error.Message.Contains("CVV"));
     }
 }

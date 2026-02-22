@@ -1,4 +1,7 @@
-public record PixDetails(
-    string PixKey,
-    string? Description
-);
+﻿namespace Domain.ValueObjects;
+
+public record PixDetails : PaymentMethod
+{
+    public string? PixKey { get; init; }
+    public string? Description { get; init; }
+}

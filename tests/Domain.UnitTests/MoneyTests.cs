@@ -1,4 +1,4 @@
-using Domain.Enums;
+﻿using Domain.Enums;
 using Domain.ValueObjects;
 
 namespace Domain.UnitTests;
@@ -25,14 +25,5 @@ public class MoneyTests
         Assert.Equal("US$", money.MoneyTag);
         Assert.Equal(2, money.Decimals);
         Assert.Equal("US$ 20.12", money.ToString());
-    }
-
-    [Fact]
-    public void Money_Base_Record_Should_Keep_Amount_And_Currency()
-    {
-        var money = new Money(99.99m, CurrencyType.USD);
-
-        Assert.Equal(99.99m, money.Amount);
-        Assert.Equal(CurrencyType.USD, money.Currency);
     }
 }

@@ -1,5 +1,6 @@
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Enums;
+using Domain.ValueObjects;
 
 namespace Domain.UnitTests;
 
@@ -16,10 +17,11 @@ public class PaymentTests
             expirationDate: DateTime.UtcNow.AddMonths(6),
             cvv: "123");
 
-        Assert.True(result.IsT0);
-        Assert.Equal(PaymentType.CreditCard, result.AsT0.Type);
-        Assert.Equal(100m, result.AsT0.Amount.Amount);
-        Assert.Equal("Order #123", result.AsT0.Description);
+        Assert.IsType<Payment>(result.Value);
+        Assert.Equal(PaymentType.CreditCard, result.Value.PaymentType);
+        Assert.IsType<BRL>(result.Value.Money);
+        Assert.Equal(100m, result.Value.Money.Amount);
+        Assert.Equal("Order #123", result.Value.Description);
     }
 
     [Fact]
@@ -33,7 +35,8 @@ public class PaymentTests
             expirationDate: DateTime.UtcNow.AddMonths(-2),
             cvv: "1");
 
-        Assert.True(result.IsT1);
-        Assert.NotEmpty(result.AsT1.Errors);
+        Assert.True(result.IsFailed);
+        Assert.NotEmpty(result.Errors);
+        Assert.Contains(result.Errors, error => error.Message.Contains("holder name"));
     }
 }

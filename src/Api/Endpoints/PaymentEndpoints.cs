@@ -1,4 +1,5 @@
-namespace Api.Endpoints;
+﻿namespace Api.Endpoints;
+
 public static class PaymentEndpoints
 {
     public static void MapPaymentEndpoints(this IEndpointRouteBuilder endpoints)

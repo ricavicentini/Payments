@@ -1,11 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using OneOf;
+
+using FluentResults;
+
 
 namespace Domain.ValueObjects;
 
-public sealed record CreditCardDetails
+public sealed record CreditCardDetails : PaymentMethod
 {
     private const int MinCardNumberLength = 13;
     private const int MaxCardNumberLength = 19;
@@ -26,7 +28,7 @@ public sealed record CreditCardDetails
         CVV = cvv;
     }
 
-    public static OneOf<CreditCardDetails, CreditCardValidationErrors> Create(
+    public static Result<CreditCardDetails> Create(
         string cardNumber,
         string cardHolderName,
         DateTime expirationDate,
@@ -37,9 +39,9 @@ public sealed record CreditCardDetails
         var normalizedCvv = cvv?.Trim();
         var errors = Validate(normalizedCardNumber, normalizedHolderName, expirationDate, normalizedCvv);
 
-        if (errors.Count > 0)
+        if (errors.Any())
         {
-            return new CreditCardValidationErrors(errors);
+            return Result.Fail(errors);
         }
 
         return new CreditCardDetails(
@@ -54,7 +56,7 @@ public sealed record CreditCardDetails
             ? string.Empty
             : value.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-    private static List<string> Validate(
+    private static IEnumerable<string> Validate(
         string normalizedCardNumber,
         string? normalizedHolderName,
         DateTime expirationDate,

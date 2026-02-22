@@ -4,6 +4,6 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="OneOf" Version="3.0.271" />
+      <PackageReference Include="FluentResults" Version="4.0.0" />
     </ItemGroup>
 </Project>
